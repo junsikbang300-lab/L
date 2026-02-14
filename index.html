@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Love Builder ❤️</title>
+
+<style>
+body{
+font-family:sans-serif;
+background:#fff0f5;
+padding:20px;
+overflow-x:hidden;
+}
+
+/* floating hearts */
+.heart{
+position:fixed;
+bottom:-20px;
+font-size:20px;
+animation:float 6s linear infinite;
+opacity:.7;
+}
+
+@keyframes float{
+0%{transform:translateY(0);opacity:.7}
+100%{transform:translateY(-110vh);opacity:0}
+}
+
+.step{display:none}
+.active{display:block}
+
+button{
+padding:12px;
+border:none;
+border-radius:10px;
+background:#ff4d6d;
+color:white;
+font-size:16px;
+margin-top:10px;
+width:100%;
+}
+
+.card{
+background:white;
+padding:20px;
+border-radius:15px;
+margin-top:20px;
+}
+
+canvas{
+width:100%;
+height:120px;
+background:#bbb;
+border-radius:10px;
+}
+</style>
+</head>
+
+<body>
+
+<h2 id="stepTitle">STEP 1</h2>
+
+<div class="step active" id="s1">
+<input id="name1" placeholder="이름 1"><br><br>
+<input id="name2" placeholder="이름 2"><br><br>
+<input id="date" type="date"><br>
+<button onclick="next(2)">다음</button>
+</div>
+
+<div class="step" id="s2">
+<textarea id="msg" placeholder="사랑 메시지"></textarea><br>
+<button onclick="next(3)">다음</button>
+</div>
+
+<div class="step" id="s3">
+<input id="secret" placeholder="숨김 메시지"><br>
+<button onclick="next(4)">다음</button>
+</div>
+
+<div class="step" id="s4">
+<button onclick="generate()">페이지 만들기 ❤️</button>
+</div>
+
+<div id="result" class="card"></div>
+
+<script>
+/* floating hearts generator */
+function spawnHeart(){
+let h=document.createElement("div")
+h.className="heart"
+h.innerHTML="❤️"
+h.style.left=Math.random()*100+"vw"
+h.style.animationDuration=(4+Math.random()*4)+"s"
+document.body.appendChild(h)
+setTimeout(()=>h.remove(),8000)
+}
+setInterval(spawnHeart,600)
+
+function next(n){
+document.querySelectorAll(".step").forEach(s=>s.classList.remove("active"))
+document.getElementById("s"+n).classList.add("active")
+stepTitle.innerText="STEP "+n
+}
+
+function daysTogether(date){
+let start=new Date(date)
+let today=new Date()
+return Math.floor((today-start)/(1000*60*60*24))
+}
+
+function generate(){
+let n1=name1.value||"우리"
+let n2=name2.value||"커플"
+let d=date.value
+let days=d?daysTogether(d):0
+let m=msg.value||"사랑해"
+let sec=secret.value||"비밀 메시지"
+
+result.innerHTML=`
+<h3>${n1} ❤️ ${n2}</h3>
+<p>${days}일째 함께</p>
+<p>${m}</p>
+<h4>🎁 스크래치</h4>
+<div style="position:relative">
+<canvas id="scratch"></canvas>
+<div style="position:absolute;top:40px;width:100%;text-align:center;font-weight:bold">
+${sec}
+</div>
+</div>`
+
+initScratch()
+}
+
+function initScratch(){
+let c=document.getElementById("scratch")
+let ctx=c.getContext("2d")
+c.width=c.offsetWidth
+c.height=c.offsetHeight
+
+ctx.fillStyle="#999"
+ctx.fillRect(0,0,c.width,c.height)
+
+let scratching=false
+
+function scratch(e){
+if(!scratching)return
+let rect=c.getBoundingClientRect()
+let x=(e.touches?e.touches[0].clientX:e.clientX)-rect.left
+let y=(e.touches?e.touches[0].clientY:e.clientY)-rect.top
+ctx.globalCompositeOperation="destination-out"
+ctx.beginPath()
+ctx.arc(x,y,20,0,Math.PI*2)
+ctx.fill()
+}
+
+c.onmousedown=()=>scratching=true
+c.onmouseup=()=>scratching=false
+c.onmousemove=scratch
+
+c.ontouchstart=()=>scratching=true
+c.ontouchend=()=>scratching=false
+c.ontouchmove=scratch
+}
+</script>
+
+</body>
+</html>
